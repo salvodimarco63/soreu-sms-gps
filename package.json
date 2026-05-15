@@ -1,0 +1,15 @@
+{
+  "name": "soreu-gps-professional",
+  "version": "2.0.0",
+  "description": "Sistema richiesta posizione GPS volontaria con centrale operativa",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
