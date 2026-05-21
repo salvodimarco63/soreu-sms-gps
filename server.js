@@ -1,3 +1,4 @@
+const fs = require("fs");
 const express = require("express");
 const http = require("http");
 const path = require("path");
@@ -20,11 +21,15 @@ app.get("/centrale", (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.sendFile(path.join(__dirname, "public", "centrale.html"));
 });
+app.get("/centrale", (req, res) => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "public", "centrale.html"),
+    "utf8"
+  );
 
-app.get("/localizza/:token", (req, res) => {
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store");
-  res.sendFile(path.join(__dirname, "public", "localizza.html"));
+  res.status(200);
+  res.set("Content-Type", "text/html; charset=utf-8");
+  res.send(html);
 });
 
 app.post("/api/position", (req, res) => {
