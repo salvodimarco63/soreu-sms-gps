@@ -1,7 +1,5 @@
-const fs = require("fs");
 const express = require("express");
 const http = require("http");
-const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
@@ -17,19 +15,142 @@ app.get("/", (req, res) => {
 });
 
 app.get("/centrale", (req, res) => {
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store");
-  res.sendFile(path.join(__dirname, "public", "centrale.html"));
-});
-app.get("/centrale", (req, res) => {
-  const html = fs.readFileSync(
-    path.join(__dirname, "public", "centrale.html"),
-    "utf8"
-  );
+  res.type("html").send(`
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>ADRN Centrale</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+body { margin:0; font-family:Arial; }
+#map { width:100%; height:100vh; }
+#sidebar {
+ position:absolute; top:10px; right:10px; width:260px;
+ background:white; z-index:1000; border-radius:10px;
+ padding:10px; box-shadow:0 0 10px rgba(0,0,0,0.3);
+}
+.target { border-bottom:1px solid #ddd; padding:6px; }
+</style>
+</head>
+<body>
+<div id="sidebar">
+<h2>ADRN</h2>
+<div id="targets">Nessun target</div>
+</div>
+<div id="map"></div>
 
-  res.status(200);
-  res.set("Content-Type", "text/html; charset=utf-8");
-  res.send(html);
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const map = L.map("map").setView([45.4642, 9.19], 8);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+ attribution: "&copy; OpenStreetMap"
+}).addTo(map);
+
+const socket = io();
+const markers = {};
+
+function updateSidebar() {
+ const box = document.getElementById("targets");
+ let html = "";
+ Object.values(markers).forEach(m => {
+   html += "<div class='target'><b>" + m.token + "</b><br>" + m.timestamp + "</div>";
+ });
+ box.innerHTML = html || "Nessun target";
+}
+
+function updateMarker(data) {
+ const key = data.token;
+
+ if (markers[key]) {
+   markers[key].marker.setLatLng([data.lat, data.lon]);
+   markers[key].timestamp = data.timestamp;
+ } else {
+   const marker = L.marker([data.lat, data.lon]).addTo(map);
+   marker.bindPopup("<b>" + data.token + "</b><br>Accuratezza: " + Math.round(data.accuracy) + " m");
+   markers[key] = { marker: marker, token: data.token, timestamp: data.timestamp };
+ }
+
+ updateSidebar();
+ map.setView([data.lat, data.lon], 15);
+}
+
+fetch("/api/positions")
+ .then(r => r.json())
+ .then(list => list.forEach(updateMarker));
+
+socket.on("position", updateMarker);
+</script>
+</body>
+</html>
+  `);
+});
+
+app.get("/localizza/:token", (req, res) => {
+  res.type("html").send(`
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>ADRN Localizzazione</title>
+<style>
+body { font-family:Arial; text-align:center; padding:40px; }
+h1 { color:#d32f2f; }
+button {
+ padding:16px 28px; font-size:20px; border:0; border-radius:10px;
+ background:#1976d2; color:white;
+}
+#status { margin-top:25px; font-size:20px; font-weight:bold; }
+</style>
+</head>
+<body>
+<h1>ADRN</h1>
+<p>Premi il pulsante per inviare volontariamente la tua posizione GPS ai soccorritori.</p>
+<button onclick="sendPosition()">INVIA POSIZIONE GPS</button>
+<div id="status"></div>
+
+<script>
+function sendPosition() {
+ const status = document.getElementById("status");
+ const token = window.location.pathname.split("/").pop();
+
+ if (!navigator.geolocation) {
+   status.innerHTML = "GPS non supportato";
+   return;
+ }
+
+ status.innerHTML = "Acquisizione GPS...";
+
+ navigator.geolocation.getCurrentPosition(async function(pos) {
+   const body = {
+     token: token,
+     lat: pos.coords.latitude,
+     lon: pos.coords.longitude,
+     accuracy: pos.coords.accuracy,
+     timestamp: new Date().toISOString()
+   };
+
+   const r = await fetch("/api/position", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify(body)
+   });
+
+   status.innerHTML = r.ok ? "Posizione inviata correttamente" : "Errore invio posizione";
+ }, function() {
+   status.innerHTML = "Impossibile ottenere la posizione GPS";
+ }, {
+   enableHighAccuracy: true,
+   timeout: 15000,
+   maximumAge: 0
+ });
+}
+</script>
+</body>
+</html>
+  `);
 });
 
 app.post("/api/position", (req, res) => {
@@ -52,8 +173,6 @@ app.post("/api/position", (req, res) => {
 app.get("/api/positions", (req, res) => {
   res.json(Object.values(positions));
 });
-
-app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 10000;
 
