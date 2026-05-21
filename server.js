@@ -1,70 +1,19 @@
 const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
-app.use(express.json());
-app.use(express.static("public"));
-
-let lastPositions = {};
-
-app.post("/api/position", (req, res) => {
-
-  const {
-    token,
-    lat,
-    lon,
-    accuracy,
-    timestamp
-  } = req.body;
-
-  if (!token || !lat || !lon) {
-    return res.status(400).json({
-      error: "Dati mancanti"
-    });
-  }
-
-  const position = {
-    token,
-    lat,
-    lon,
-    accuracy,
-    timestamp: timestamp || new Date().toISOString()
-  };
-
-  lastPositions[token] = position;
-
-  io.emit("position", position);
-
-  res.json({ ok: true });
-
-});
-
-app.get("/api/positions", (req, res) => {
-
-  res.json(Object.values(lastPositions));
-
-});
-
-app.get("/localizza/:token", (req, res) => {
-
-  res.sendFile(__dirname + "/public/localizza.html");
-
+app.get("/", (req, res) => {
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.end("<h1>ADRN FUNZIONA</h1><p>Pagina HTML Render OK</p>");
 });
 
 app.get("/centrale", (req, res) => {
-
-  res.sendFile(__dirname + "/public/centrale.html");
-
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.end("<h1>ADRN CENTRALE</h1><p>Se vedi questo come pagina normale, il problema è nel file centrale.html.</p>");
 });
 
 const PORT = process.env.PORT || 10000;
 
-server.listen(PORT, () => {
-
-  console.log(`ADRN server attivo su porta ${PORT}`);
-
+app.listen(PORT, () => {
+  console.log("ADRN test server attivo su porta " + PORT);
 });
