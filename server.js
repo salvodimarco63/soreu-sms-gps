@@ -1,3 +1,5 @@
+app.disable("x-powered-by");
+const app = express();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -13,23 +15,37 @@ let positions = {};
 app.get("/", (req, res) => {
   res.redirect("/centrale");
 });
-
 app.get("/centrale", (req, res) => {
-  res.type("html").send(`
+
+  res.setHeader("Content-Type", "text/html");
+
+  res.end(`
 <!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>ADRN Centrale</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<title>ADRN</title>
 <style>
-body { margin:0; font-family:Arial; }
-#map { width:100%; height:100vh; }
-#sidebar {
- position:absolute; top:10px; right:10px; width:260px;
- background:white; z-index:1000; border-radius:10px;
- padding:10px; box-shadow:0 0 10px rgba(0,0,0,0.3);
+html,body{
+margin:0;
+height:100%;
 }
+iframe{
+border:0;
+width:100%;
+height:100%;
+}
+</style>
+</head>
+<body>
+
+<iframe src="https://www.openstreetmap.org/export/embed.html"></iframe>
+
+</body>
+</html>
+  `);
+
+});
 .target { border-bottom:1px solid #ddd; padding:6px; }
 </style>
 </head>
