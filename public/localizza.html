@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADRN Localizzazione</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #d32f2f;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>ADRN</h1>
+
+<p>
+Premi il pulsante per inviare volontariamente
+la tua posizione GPS ai soccorritori.
+</p>
+
+<button onclick="sendPosition()">
+INVIA POSIZIONE GPS
+</button>
+
+<div id="status"></div>
+
+<script>
+
+async function sendPosition() {
+
+  const status = document.getElementById("status");
+
+  if (!navigator.geolocation) {
+    status.innerHTML = "Geolocalizzazione non supportata";
+    return;
+  }
+
+  status.innerHTML = "Acquisizione GPS...";
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      const token = window.location.pathname.split("/").pop();
+
+      const response = await fetch("/api/position", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          lat,
+          lon,
+          accuracy,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        status.innerHTML =
+          "Posizione inviata correttamente";
+      } else {
+        status.innerHTML =
+          "Errore invio posizione";
+      }
+
+    },
+
+    (error) => {
+      status.innerHTML =
+        "Impossibile ottenere la posizione GPS";
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0,
+    }
+  );
+}
+
+</script>
+
+</body>
+</html>

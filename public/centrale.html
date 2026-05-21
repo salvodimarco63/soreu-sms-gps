@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ADRN Centrale</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <style>
+
+    body {
+      margin: 0;
+      font-family: Arial;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([45.4642, 9.19], 8);
+
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; OpenStreetMap'
+  }
+).addTo(map);
+
+const socket = io();
+
+const markers = {};
+
+socket.on("position", (data) => {
+
+  const key = data.token;
+
+  if (markers[key]) {
+
+    markers[key].setLatLng([data.lat, data.lon]);
+
+  } else {
+
+    markers[key] = L.marker([data.lat, data.lon])
+      .addTo(map)
+      .bindPopup(
+        `
+        <b>Token:</b> ${data.token}<br>
+        <b>Accuratezza:</b> ${Math.round(data.accuracy)} m<br>
+        <b>Ora:</b> ${data.timestamp}
+        `
+      );
+
+  }
+
+  map.setView([data.lat, data.lon], 15);
+
+});
+
+</script>
+
+</body>
+</html>
