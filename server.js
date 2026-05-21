@@ -11,25 +11,26 @@ app.use(express.json());
 
 let positions = {};
 
+app.use(express.static(path.join(__dirname, "public")));
+
 app.get("/", (req, res) => {
-  res.redirect("/centrale");
-});
-
-app.get("/centrale", (req, res) => {
-  res.type("html");
-  res.sendFile(path.join(__dirname, "public", "centrale.html"));
-});
-
-app.get("/localizza/:token", (req, res) => {
-  res.type("html");
-  res.sendFile(path.join(__dirname, "public", "localizza.html"));
+  res.redirect("/centrale.html");
 });
 
 app.post("/api/position", (req, res) => {
-  const { token, lat, lon, accuracy, timestamp } = req.body;
+
+  const {
+    token,
+    lat,
+    lon,
+    accuracy,
+    timestamp
+  } = req.body;
 
   if (!token || !lat || !lon) {
-    return res.status(400).json({ error: "Dati mancanti" });
+    return res.status(400).json({
+      error: "Dati mancanti"
+    });
   }
 
   const position = {
@@ -41,16 +42,18 @@ app.post("/api/position", (req, res) => {
   };
 
   positions[token] = position;
+
   io.emit("position", position);
 
-  res.json({ ok: true });
+  res.json({
+    ok: true
+  });
+
 });
 
 app.get("/api/positions", (req, res) => {
   res.json(Object.values(positions));
 });
-
-app.use(express.static("public"));
 
 const PORT = process.env.PORT || 10000;
 
