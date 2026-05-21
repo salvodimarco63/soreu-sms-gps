@@ -13,26 +13,23 @@
   </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!doctype html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
 <p class="p1"><span class="s1">&lt;html lang="it"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
 <p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;title&gt;ADRN Centrale&lt;/title&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;link</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>rel="stylesheet"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>href="https://unpkg.com/leaflet/dist/leaflet.css"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>rel="stylesheet"</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>href="https://unpkg.com/leaflet/dist/leaflet.css"</span></p>
 <p class="p1"><span class="s1">/&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;style&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">body {</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>font-family: Arial;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>font-family: Arial, sans-serif;</span></p>
 <p class="p1"><span class="s1">}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">#map {</span></p>
@@ -41,7 +38,6 @@
 <p class="p1"><span class="s1">}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">#sidebar {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>position: absolute;</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>top: 10px;</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>right: 10px;</span></p>
@@ -60,12 +56,9 @@
 <p class="p1"><span class="s1">}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">.target {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>border-bottom: 1px solid #ddd;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>padding: 5px;</span></p>
 <p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;/style&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;/head&gt;</span></p>
@@ -73,11 +66,8 @@
 <p class="p1"><span class="s1">&lt;body&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;div id="sidebar"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;h2&gt;ADRN&lt;/h2&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div id="targets"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h2&gt;ADRN&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="targets"&gt;&lt;/div&gt;</span></p>
 <p class="p1"><span class="s1">&lt;/div&gt;</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">&lt;div id="map"&gt;&lt;/div&gt;</span></p>
@@ -93,7 +83,7 @@
 <p class="p1"><span class="s1">L.tileLayer(</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>attribution: '&amp;copy; OpenStreetMap'</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>attribution: '&amp;copy; OpenStreetMap contributors'</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
 <p class="p1"><span class="s1">).addTo(map);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
@@ -103,16 +93,14 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">async function loadPositions() {</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const response =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await fetch("/api/positions");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const response = await fetch('/api/positions');</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const positions =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await response.json();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const positions = await response.json();</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>positions.forEach(updateMarker);</span></p>
 <p class="p1"><span class="s1">}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function updateSidebar(data) {</span></p>
+<p class="p1"><span class="s1">function updateSidebar() {</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const container =</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById("targets");</span></p>
@@ -138,8 +126,10 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if (markers[key]) {</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key].marker</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.setLatLng([data.lat, data.lon]);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key].marker.setLatLng([</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lat,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lon</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>]);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key].timestamp =</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.timestamp;</span></p>
@@ -155,7 +145,7 @@
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>`</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;b&gt;${data.token}&lt;/b&gt;&lt;br&gt;</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>Accuratezza:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>${Math.round(data.accuracy)} m</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>${Math.round(data.accuracy || 0)} m</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>`</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
@@ -164,17 +154,19 @@
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>token: data.token,</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>timestamp: data.timestamp</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>updateSidebar(data);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>updateSidebar();</span></p>
 <p class="p1"><span class="s1">}</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">socket.on("position", (data) =&gt; {</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>updateMarker(data);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>map.setView([data.lat, data.lon], 15);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>map.setView([</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>data.lat,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>data.lon</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>], 15);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">});</span></p>
 <p class="p2"><span class="s1"></span><br></p>
