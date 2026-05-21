@@ -9,13 +9,22 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static("public"));
 
-let lastPositions = {};
+let positions = {};
 
 app.post("/api/position", (req, res) => {
-  const { token, lat, lon, accuracy, timestamp } = req.body;
+
+  const {
+    token,
+    lat,
+    lon,
+    accuracy,
+    timestamp
+  } = req.body;
 
   if (!token || !lat || !lon) {
-    return res.status(400).json({ error: "Dati mancanti" });
+    return res.status(400).json({
+      error: "Dati mancanti"
+    });
   }
 
   const position = {
@@ -23,17 +32,21 @@ app.post("/api/position", (req, res) => {
     lat,
     lon,
     accuracy,
-    timestamp: timestamp || new Date().toISOString(),
+    timestamp: timestamp || new Date().toISOString()
   };
 
-  lastPositions[token] = position;
+  positions[token] = position;
+
   io.emit("position", position);
 
-  res.json({ ok: true });
+  res.json({
+    ok: true
+  });
+
 });
 
 app.get("/api/positions", (req, res) => {
-  res.json(Object.values(lastPositions));
+  res.json(Object.values(positions));
 });
 
 app.get("/localizza/:token", (req, res) => {
@@ -45,6 +58,7 @@ app.get("/centrale", (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
 server.listen(PORT, () => {
-  console.log(`ADRN server attivo su porta ${PORT}`);
+  console.log("ADRN server attivo su porta " + PORT);
 });
