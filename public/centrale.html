@@ -1,180 +1,81 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="it">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ADRN Centrale</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <style>
+
+    body {
+      margin: 0;
+      font-family: Arial;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+
   </style>
 </head>
+
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="it"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;title&gt;ADRN Centrale&lt;/title&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;link</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>rel="stylesheet"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>href="https://unpkg.com/leaflet/dist/leaflet.css"</span></p>
-<p class="p1"><span class="s1">/&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;style&gt;</span></p>
-<p class="p1"><span class="s1">body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>font-family: Arial, sans-serif;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">#map {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>height: 100vh;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">#sidebar {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>top: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>right: 10px;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>width: 250px;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>background: white;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>z-index: 1000;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>border-radius: 10px;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>padding: 10px;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>box-shadow: 0 0 10px rgba(0,0,0,0.3);</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">.target {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>border-bottom: 1px solid #ddd;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>padding: 5px;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div id="sidebar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h2&gt;ADRN&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="targets"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div id="map"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script src="/socket.io/socket.io.js"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script src="https://unpkg.com/leaflet/dist/leaflet.js"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">const map = L.map('map').setView([45.4642, 9.19], 8);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">L.tileLayer(</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>attribution: '&amp;copy; OpenStreetMap contributors'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">).addTo(map);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">const socket = io();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">const markers = {};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">async function loadPositions() {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const response = await fetch('/api/positions');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const positions = await response.json();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>positions.forEach(updateMarker);</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function updateSidebar() {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const container =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById("targets");</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>let html = "";</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>Object.values(markers).forEach((m) =&gt; {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>html += `</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="target"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;b&gt;${m.token}&lt;/b&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>${m.timestamp}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>container.innerHTML = html;</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function updateMarker(data) {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const key = data.token;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if (markers[key]) {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key].marker.setLatLng([</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lat,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lon</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key].timestamp =</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.timestamp;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} else {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const marker = L.marker([</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lat,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>data.lon</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>])</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.addTo(map)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.bindPopup(</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>`</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;b&gt;${data.token}&lt;/b&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>Accuratezza:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>${Math.round(data.accuracy || 0)} m</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>`</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>markers[key] = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>marker,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>token: data.token,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>timestamp: data.timestamp</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>updateSidebar();</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">socket.on("position", (data) =&gt; {</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>updateMarker(data);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>map.setView([</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>data.lat,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>data.lon</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>], 15);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">loadPositions();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+<div id="map"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([45.4642, 9.19], 8);
+
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; OpenStreetMap'
+  }
+).addTo(map);
+
+const socket = io();
+
+const markers = {};
+
+socket.on("position", (data) => {
+
+  const key = data.token;
+
+  if (markers[key]) {
+
+    markers[key].setLatLng([data.lat, data.lon]);
+
+  } else {
+
+    markers[key] = L.marker([data.lat, data.lon])
+      .addTo(map)
+      .bindPopup(
+        `
+        <b>Token:</b> ${data.token}<br>
+        <b>Accuratezza:</b> ${Math.round(data.accuracy)} m<br>
+        <b>Ora:</b> ${data.timestamp}
+        `
+      );
+
+  }
+
+  map.setView([data.lat, data.lon], 15);
+
+});
+
+</script>
+
 </body>
 </html>
