@@ -16,7 +16,8 @@
     input { width:100%; padding:12px; color:var(--text); background:#0d110d; border:1px solid #4a554a; border-radius:8px; font-size:15px; }
     button { border:0; border-radius:8px; padding:11px 13px; cursor:pointer; font-weight:700; text-align:center; }
     .primary { width:100%; margin-top:10px; background:var(--lime); color:#151a12; } .secondary { background:#344034; color:white; }
-    .whatsapp { background:#25d366; color:#071b0e; } .row { display:flex; gap:8px; margin-top:10px; } .row > * { flex:1; }
+    .whatsapp { background:#25d366; color:#071b0e; } .danger { width:100%; margin-top:8px; background:#8f2828; color:white; }
+    .row { display:flex; gap:8px; margin-top:10px; } .row > * { flex:1; }
     .request { border-top:1px solid var(--line); padding:13px 0 4px; } .request:first-child { border-top:0; }
     .status { color:var(--lime); font-weight:700; font-size:13px; } .coords { color:var(--blue); margin:7px 0; font-family:monospace; }
     .small { color:var(--muted); font-size:12px; line-height:1.4; } #message { min-height:20px; margin-top:8px; color:var(--lime); font-size:13px; }
@@ -63,13 +64,23 @@
     async function copyLink(code) { await navigator.clipboard.writeText(locatorLink(code)); document.getElementById("message").textContent = `Link ${code} copiato.`; }
     function openWhatsApp(code) { const text = `ADRN Soccorso: apri il link e condividi volontariamente la posizione GPS: ${locatorLink(code)}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener"); }
     function focusPosition(code) { const marker = markers.get(code); if (marker) { map.setView(marker.getLatLng(),16); marker.openPopup(); } }
+    async function deleteRequest(code) {
+      if (!confirm(`Eliminare definitivamente la richiesta ${code}? Il link non sarà più utilizzabile.`)) return;
+      try {
+        await api(`/api/request/${encodeURIComponent(code)}`, { method:"DELETE" });
+        const marker = markers.get(code);
+        if (marker) { map.removeLayer(marker); markers.delete(code); }
+        document.getElementById("message").textContent = `Richiesta ${code} eliminata.`;
+        await refresh();
+      } catch (error) { document.getElementById("message").textContent = error.message; }
+    }
     function render(items) {
       const container = document.getElementById("requests");
       if (!items.length) { container.innerHTML = '<p class="small">Nessuna richiesta.</p>'; return; }
       container.innerHTML = items.map(item => {
         const hasPosition = Number.isFinite(item.lat) && Number.isFinite(item.lon);
         const coordinates = hasPosition ? `${item.lat.toFixed(6)}, ${item.lon.toFixed(6)}` : "Coordinate in attesa";
-        return `<article class="request"><div class="status">${escapeHtml(item.status)} · ${escapeHtml(item.code)}</div><div>${escapeHtml(item.note)}</div><div class="coords">${coordinates}</div><div class="small">Aggiornato: ${when(item.updatedAt)} · Rilevamenti: ${item.updates || 0}${item.accuracy != null ? ` · Precisione: ${Math.round(item.accuracy)} m` : ""}</div><div class="row"><button class="secondary" onclick="copyLink('${item.code}')">COPIA LINK</button><button class="whatsapp" onclick="openWhatsApp('${item.code}')">WHATSAPP</button></div>${hasPosition ? `<button class="primary" onclick="focusPosition('${item.code}')">MOSTRA SULLA MAPPA</button>` : ""}</article>`;
+        return `<article class="request"><div class="status">${escapeHtml(item.status)} · ${escapeHtml(item.code)}</div><div>${escapeHtml(item.note)}</div><div class="coords">${coordinates}</div><div class="small">Aggiornato: ${when(item.updatedAt)} · Rilevamenti: ${item.updates || 0}${item.accuracy != null ? ` · Precisione: ${Math.round(item.accuracy)} m` : ""}</div><div class="row"><button class="secondary" onclick="copyLink('${item.code}')">COPIA LINK</button><button class="whatsapp" onclick="openWhatsApp('${item.code}')">WHATSAPP</button></div>${hasPosition ? `<button class="primary" onclick="focusPosition('${item.code}')">MOSTRA SULLA MAPPA</button>` : ""}<button class="danger" onclick="deleteRequest('${item.code}')">ELIMINA</button></article>`;
       }).join("");
       for (const item of items) {
         if (!Number.isFinite(item.lat) || !Number.isFinite(item.lon)) continue;
