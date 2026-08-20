@@ -4,101 +4,132 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ADRN Localizzazione</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 30px;
-      background: #f5f5f5;
-    }
-
-    h1 {
-      color: #d32f2f;
-    }
-
-    button {
-      padding: 15px 25px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      background: #1976d2;
-      color: white;
-      cursor: pointer;
-    }
-
-    #status {
-      margin-top: 20px;
-      font-size: 18px;
-    }
+    body { font-family:Arial,sans-serif; text-align:center; padding:30px; background:#f5f5f5; }
+    h1 { color:#d32f2f; }
+    button { padding:15px 25px; font-size:18px; border:0; border-radius:10px; background:#1976d2; color:white; cursor:pointer; }
+    button:disabled { opacity:.7; cursor:default; }
+    #status { margin-top:20px; font-size:18px; line-height:1.5; }
+    #accuracy { margin-top:12px; color:#555; }
   </style>
 </head>
-
 <body>
+  <h1>ADRN</h1>
+  <p>Premi il pulsante per condividere volontariamente la tua posizione GPS con i soccorritori.</p>
+  <button id="send">AVVIA LOCALIZZAZIONE GPS</button>
+  <div id="status"></div>
+  <div id="accuracy"></div>
 
-<h1>ADRN</h1>
+  <script>
+    const WINDOW_MS = 60 * 1000;
+    const MONITORING_DURATION_MS = 15 * 60 * 1000;
+    let watchId = null;
+    let windowTimer = null;
+    let countdownTimer = null;
+    let stopTimer = null;
+    let bestPosition = null;
+    let windowStartedAt = null;
+    let sentUpdates = 0;
 
-<p>
-Premi il pulsante per inviare volontariamente
-la tua posizione GPS ai soccorritori.
-</p>
+    function showCountdown() {
+      if (!windowStartedAt) return;
+      const elapsed = Date.now() - windowStartedAt;
+      const remaining = Math.max(0, Math.ceil((WINDOW_MS - elapsed) / 1000));
+      document.getElementById("status").innerHTML =
+        `Ricerca della posizione più precisa…<br>Invio tra ${remaining} secondi.`;
+    }
 
-<button id="send" onclick="sendPosition()">
-INVIA POSIZIONE GPS
-</button>
+    function considerPosition(position) {
+      const currentAccuracy = Number(position.coords.accuracy);
+      const bestAccuracy = bestPosition ? Number(bestPosition.coords.accuracy) : Infinity;
+      if (!bestPosition || (Number.isFinite(currentAccuracy) && currentAccuracy < bestAccuracy)) {
+        bestPosition = position;
+      }
+      const shown = bestPosition && Number.isFinite(Number(bestPosition.coords.accuracy))
+        ? Math.round(bestPosition.coords.accuracy)
+        : "—";
+      document.getElementById("accuracy").textContent = `Migliore precisione rilevata nel minuto: ${shown} m`;
+    }
 
-<div id="status"></div>
+    function geoError(error) {
+      const messages = {
+        1: "Permesso GPS negato. Abilita la posizione e riprova.",
+        2: "Posizione GPS temporaneamente non disponibile.",
+        3: "Tempo di acquisizione GPS scaduto: la ricerca continua."
+      };
+      document.getElementById("accuracy").textContent = messages[error.code] || "Impossibile ottenere la posizione GPS.";
+    }
 
-<script>
+    async function transmitBestPosition() {
+      if (!bestPosition) {
+        windowStartedAt = Date.now();
+        showCountdown();
+        return;
+      }
 
-const MONITORING_DURATION_MS = 15 * 60 * 1000;
-let watchId = null;
-let started = false;
-let bestAccuracy = Infinity;
+      const position = bestPosition;
+      bestPosition = null;
+      windowStartedAt = Date.now();
+      const coords = position.coords;
+      const token = location.pathname.split("/").pop();
 
-async function transmit(position) {
-  const status = document.getElementById("status");
-  const c = position.coords;
-  const token = window.location.pathname.split("/").pop();
-  bestAccuracy = Math.min(bestAccuracy, c.accuracy || Infinity);
-  const response = await fetch("/api/position/" + encodeURIComponent(token), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ lat: c.latitude, lon: c.longitude, accuracy: c.accuracy, altitude: c.altitude, speed: c.speed, heading: c.heading }),
-  });
-  status.innerHTML = response.ok
-    ? `Posizione inviata. Precisione ~${Math.round(c.accuracy || 0)} m.<br>Monitoraggio attivo per 15 minuti: lascia aperta questa pagina.`
-    : "Errore invio posizione";
-}
+      try {
+        const response = await fetch(`/api/position/${encodeURIComponent(token)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lat: coords.latitude,
+            lon: coords.longitude,
+            accuracy: coords.accuracy,
+            altitude: coords.altitude,
+            speed: coords.speed,
+            heading: coords.heading
+          })
+        });
+        if (!response.ok) throw new Error("Invio non riuscito");
+        sentUpdates += 1;
+        document.getElementById("accuracy").textContent =
+          `Posizione n. ${sentUpdates} inviata · precisione ${Math.round(coords.accuracy || 0)} m`;
+      } catch (error) {
+        document.getElementById("accuracy").textContent = "Errore durante l’invio. Nuovo tentativo fra 60 secondi.";
+      }
+    }
 
-function geoError() {
-  document.getElementById("status").innerHTML = "Impossibile ottenere la posizione GPS. Verifica il permesso e riprova.";
-}
+    function stopMonitoring() {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      clearInterval(windowTimer);
+      clearInterval(countdownTimer);
+      clearTimeout(stopTimer);
+      watchId = null;
+      document.getElementById("send").textContent = "MONITORAGGIO COMPLETATO";
+      document.getElementById("status").innerHTML =
+        `Monitoraggio di 15 minuti completato.<br>Posizioni inviate: ${sentUpdates}.`;
+    }
 
-async function sendPosition() {
+    function startMonitoring() {
+      if (!navigator.geolocation) {
+        document.getElementById("status").textContent = "Geolocalizzazione non supportata.";
+        return;
+      }
+      const button = document.getElementById("send");
+      button.disabled = true;
+      button.textContent = "MONITORAGGIO ATTIVO";
+      windowStartedAt = Date.now();
+      showCountdown();
+      watchId = navigator.geolocation.watchPosition(considerPosition, geoError, {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0
+      });
+      countdownTimer = setInterval(showCountdown, 1000);
+      windowTimer = setInterval(transmitBestPosition, WINDOW_MS);
+      stopTimer = setTimeout(async () => {
+        if (bestPosition) await transmitBestPosition();
+        stopMonitoring();
+      }, MONITORING_DURATION_MS);
+    }
 
-  const status = document.getElementById("status");
-
-  if (!navigator.geolocation) {
-    status.innerHTML = "Geolocalizzazione non supportata";
-    return;
-  }
-
-  if (started) return;
-  started = true;
-  document.getElementById("send").disabled = true;
-  status.innerHTML = "Acquisizione GPS...";
-  const options = { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 };
-  navigator.geolocation.getCurrentPosition(transmit, geoError, options);
-  watchId = navigator.geolocation.watchPosition(transmit, geoError, options);
-  setTimeout(() => {
-    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-    document.getElementById("send").textContent = "MONITORAGGIO COMPLETATO";
-    status.innerHTML = `Monitoraggio di 15 minuti completato. Migliore precisione ~${Math.round(bestAccuracy)} m.`;
-  }, MONITORING_DURATION_MS);
-}
-
-</script>
-
+    document.getElementById("send").addEventListener("click", startMonitoring);
+  </script>
 </body>
 </html>
