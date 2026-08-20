@@ -1,81 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>ADRN Centrale</title>
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ADRN Centrale SMS Locator</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
-
-    body {
-      margin: 0;
-      font-family: Arial;
-    }
-
-    #map {
-      width: 100%;
-      height: 100vh;
-    }
-
+    :root { color-scheme:dark; --bg:#101410; --panel:#1b211b; --line:#384238; --lime:#d7ff38; --text:#f4f5ef; --muted:#aeb7aa; --blue:#32c5ff; }
+    * { box-sizing:border-box; } body { margin:0; font-family:Arial,sans-serif; background:var(--bg); color:var(--text); }
+    header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:20px; color:var(--lime); } .layout { display:grid; grid-template-columns:390px 1fr; height:calc(100vh - 58px); }
+    aside { padding:16px; overflow:auto; border-right:1px solid var(--line); background:#141914; } #map { min-height:420px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
+    label { display:block; color:var(--muted); font-size:13px; margin-bottom:7px; }
+    input { width:100%; padding:12px; color:var(--text); background:#0d110d; border:1px solid #4a554a; border-radius:8px; font-size:15px; }
+    button { border:0; border-radius:8px; padding:11px 13px; cursor:pointer; font-weight:700; text-align:center; }
+    .primary { width:100%; margin-top:10px; background:var(--lime); color:#151a12; } .secondary { background:#344034; color:white; }
+    .whatsapp { background:#25d366; color:#071b0e; } .row { display:flex; gap:8px; margin-top:10px; } .row > * { flex:1; }
+    .request { border-top:1px solid var(--line); padding:13px 0 4px; } .request:first-child { border-top:0; }
+    .status { color:var(--lime); font-weight:700; font-size:13px; } .coords { color:var(--blue); margin:7px 0; font-family:monospace; }
+    .small { color:var(--muted); font-size:12px; line-height:1.4; } #message { min-height:20px; margin-top:8px; color:var(--lime); font-size:13px; }
+    @media (max-width:760px) { .layout { grid-template-columns:1fr; height:auto; } aside { border-right:0; } #map { height:55vh; } }
   </style>
 </head>
-
 <body>
-
-<div id="map"></div>
-
-<script src="/socket.io/socket.io.js"></script>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-
-const map = L.map('map').setView([45.4642, 9.19], 8);
-
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '&copy; OpenStreetMap'
-  }
-).addTo(map);
-
-const socket = io();
-
-const markers = {};
-
-socket.on("position", (data) => {
-
-  const key = data.token;
-
-  if (markers[key]) {
-
-    markers[key].setLatLng([data.lat, data.lon]);
-
-  } else {
-
-    markers[key] = L.marker([data.lat, data.lon])
-      .addTo(map)
-      .bindPopup(
-        `
-        <b>Token:</b> ${data.token}<br>
-        <b>Accuratezza:</b> ${Math.round(data.accuracy)} m<br>
-        <b>Ora:</b> ${data.timestamp}
-        `
-      );
-
-  }
-
-  map.setView([data.lat, data.lon], 15);
-
-});
-
-</script>
-
+  <header><h1>ADRN · SMS LOCATOR</h1><span id="connection" class="small">Aggiornamento…</span></header>
+  <main class="layout">
+    <aside>
+      <section class="card">
+        <label for="note">Descrizione della richiesta</label>
+        <input id="note" maxlength="160" value="Richiesta posizione ADRN" autocomplete="off">
+        <button id="create" class="primary">GENERA NUOVO LINK</button><div id="message"></div>
+      </section>
+      <section class="card"><strong>Richieste di localizzazione</strong><div id="requests"><p class="small">Nessuna richiesta.</p></div></section>
+    </aside>
+    <div id="map"></div>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const key = new URLSearchParams(location.search).get("key") || "";
+    const map = L.map("map").setView([45.4642, 9.19], 7);
+    const markers = new Map();
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution:"&copy; OpenStreetMap contributors", maxZoom:19 }).addTo(map);
+    const escapeHtml = value => String(value ?? "").replace(/[&<>\"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
+    const locatorLink = code => `${location.origin}/localizza/${encodeURIComponent(code)}`;
+    const when = value => value ? new Date(value).toLocaleString("it-IT") : "—";
+    async function api(path, options = {}) {
+      const separator = path.includes("?") ? "&" : "?";
+      const response = await fetch(`${path}${separator}key=${encodeURIComponent(key)}`, options);
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `Errore ${response.status}`);
+      return body;
+    }
+    async function createRequest() {
+      const button = document.getElementById("create"), message = document.getElementById("message");
+      button.disabled = true; message.textContent = "Creazione in corso…";
+      try {
+        const item = await api("/api/new", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({note:document.getElementById("note").value}) });
+        message.textContent = `Link creato: ${item.code}`; await refresh();
+      } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
+    }
+    async function copyLink(code) { await navigator.clipboard.writeText(locatorLink(code)); document.getElementById("message").textContent = `Link ${code} copiato.`; }
+    function openWhatsApp(code) { const text = `ADRN Soccorso: apri il link e condividi volontariamente la posizione GPS: ${locatorLink(code)}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener"); }
+    function focusPosition(code) { const marker = markers.get(code); if (marker) { map.setView(marker.getLatLng(),16); marker.openPopup(); } }
+    function render(items) {
+      const container = document.getElementById("requests");
+      if (!items.length) { container.innerHTML = '<p class="small">Nessuna richiesta.</p>'; return; }
+      container.innerHTML = items.map(item => {
+        const hasPosition = Number.isFinite(item.lat) && Number.isFinite(item.lon);
+        const coordinates = hasPosition ? `${item.lat.toFixed(6)}, ${item.lon.toFixed(6)}` : "Coordinate in attesa";
+        return `<article class="request"><div class="status">${escapeHtml(item.status)} · ${escapeHtml(item.code)}</div><div>${escapeHtml(item.note)}</div><div class="coords">${coordinates}</div><div class="small">Aggiornato: ${when(item.updatedAt)} · Rilevamenti: ${item.updates || 0}${item.accuracy != null ? ` · Precisione: ${Math.round(item.accuracy)} m` : ""}</div><div class="row"><button class="secondary" onclick="copyLink('${item.code}')">COPIA LINK</button><button class="whatsapp" onclick="openWhatsApp('${item.code}')">WHATSAPP</button></div>${hasPosition ? `<button class="primary" onclick="focusPosition('${item.code}')">MOSTRA SULLA MAPPA</button>` : ""}</article>`;
+      }).join("");
+      for (const item of items) {
+        if (!Number.isFinite(item.lat) || !Number.isFinite(item.lon)) continue;
+        const position = [item.lat,item.lon];
+        const popup = `<b>${escapeHtml(item.note)}</b><br>${item.lat.toFixed(6)}, ${item.lon.toFixed(6)}<br>Precisione: ${item.accuracy == null ? "—" : Math.round(item.accuracy) + " m"}`;
+        if (markers.has(item.code)) markers.get(item.code).setLatLng(position).setPopupContent(popup); else markers.set(item.code,L.marker(position).addTo(map).bindPopup(popup));
+      }
+    }
+    async function refresh() {
+      try { const items = await api("/api/list"); render(items); document.getElementById("connection").textContent = `Online · ${new Date().toLocaleTimeString("it-IT")}`; }
+      catch (error) { document.getElementById("connection").textContent = error.message; }
+    }
+    document.getElementById("create").addEventListener("click",createRequest); refresh(); setInterval(refresh,5000);
+  </script>
 </body>
 </html>
