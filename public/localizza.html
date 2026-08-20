@@ -43,13 +43,37 @@ Premi il pulsante per inviare volontariamente
 la tua posizione GPS ai soccorritori.
 </p>
 
-<button onclick="sendPosition()">
+<button id="send" onclick="sendPosition()">
 INVIA POSIZIONE GPS
 </button>
 
 <div id="status"></div>
 
 <script>
+
+const MONITORING_DURATION_MS = 15 * 60 * 1000;
+let watchId = null;
+let started = false;
+let bestAccuracy = Infinity;
+
+async function transmit(position) {
+  const status = document.getElementById("status");
+  const c = position.coords;
+  const token = window.location.pathname.split("/").pop();
+  bestAccuracy = Math.min(bestAccuracy, c.accuracy || Infinity);
+  const response = await fetch("/api/position/" + encodeURIComponent(token), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lat: c.latitude, lon: c.longitude, accuracy: c.accuracy, altitude: c.altitude, speed: c.speed, heading: c.heading }),
+  });
+  status.innerHTML = response.ok
+    ? `Posizione inviata. Precisione ~${Math.round(c.accuracy || 0)} m.<br>Monitoraggio attivo per 15 minuti: lascia aperta questa pagina.`
+    : "Errore invio posizione";
+}
+
+function geoError() {
+  document.getElementById("status").innerHTML = "Impossibile ottenere la posizione GPS. Verifica il permesso e riprova.";
+}
 
 async function sendPosition() {
 
@@ -60,52 +84,18 @@ async function sendPosition() {
     return;
   }
 
+  if (started) return;
+  started = true;
+  document.getElementById("send").disabled = true;
   status.innerHTML = "Acquisizione GPS...";
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      const accuracy = position.coords.accuracy;
-
-      const token = window.location.pathname.split("/").pop();
-
-      const response = await fetch("/api/position", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          lat,
-          lon,
-          accuracy,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-
-      if (response.ok) {
-        status.innerHTML =
-          "Posizione inviata correttamente";
-      } else {
-        status.innerHTML =
-          "Errore invio posizione";
-      }
-
-    },
-
-    (error) => {
-      status.innerHTML =
-        "Impossibile ottenere la posizione GPS";
-    },
-
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
-    }
-  );
+  const options = { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 };
+  navigator.geolocation.getCurrentPosition(transmit, geoError, options);
+  watchId = navigator.geolocation.watchPosition(transmit, geoError, options);
+  setTimeout(() => {
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    document.getElementById("send").textContent = "MONITORAGGIO COMPLETATO";
+    status.innerHTML = `Monitoraggio di 15 minuti completato. Migliore precisione ~${Math.round(bestAccuracy)} m.`;
+  }, MONITORING_DURATION_MS);
 }
 
 </script>
