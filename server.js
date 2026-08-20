@@ -1,10 +1,37 @@
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
+const fs = require("fs");
 
 const app = express();
 const requests = new Map();
 const accessKey = process.env.SMS_LOCATOR_KEY || process.env.CENTRALE_KEY || process.env.ADMIN_KEY || process.env.API_KEY || "";
+const dataDirectory = process.env.DATA_DIR || "/var/data";
+const dataFile = path.join(dataDirectory, "sms-locator-requests.json");
+
+function loadRequests() {
+  try {
+    fs.mkdirSync(dataDirectory, { recursive: true });
+    if (!fs.existsSync(dataFile)) return;
+    const saved = JSON.parse(fs.readFileSync(dataFile, "utf8"));
+    if (!Array.isArray(saved)) throw new Error("formato dati non valido");
+    for (const item of saved) {
+      if (item?.code) requests.set(String(item.code).toUpperCase(), item);
+    }
+    console.log(`SMS Locator: caricate ${requests.size} richieste da ${dataFile}`);
+  } catch (error) {
+    console.error(`SMS Locator: impossibile leggere ${dataFile}:`, error.message);
+  }
+}
+
+function persistRequests() {
+  fs.mkdirSync(dataDirectory, { recursive: true });
+  const temporaryFile = `${dataFile}.tmp`;
+  fs.writeFileSync(temporaryFile, JSON.stringify([...requests.values()], null, 2), "utf8");
+  fs.renameSync(temporaryFile, dataFile);
+}
+
+loadRequests();
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -55,6 +82,7 @@ app.post("/api/new", authorized, (req, res) => {
     updates: 0,
   };
   requests.set(code, item);
+  persistRequests();
   const link = `${req.protocol}://${req.get("host")}/localizza/${code}`;
   res.json({ code, link, message: `ADRN Soccorso: apri il link e condividi volontariamente la posizione GPS: ${link}` });
 });
@@ -64,7 +92,9 @@ app.get("/api/list", authorized, (req, res) => {
 });
 
 app.delete("/api/request/:code", authorized, (req, res) => {
-  res.json({ ok: requests.delete(String(req.params.code).toUpperCase()) });
+  const deleted = requests.delete(String(req.params.code).toUpperCase());
+  if (deleted) persistRequests();
+  res.json({ ok: deleted });
 });
 
 app.get("/localizza/:code", (req, res) => {
@@ -72,6 +102,7 @@ app.get("/localizza/:code", (req, res) => {
   if (!item) return res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
   item.openedAt ||= new Date().toISOString();
   item.updatedAt = new Date().toISOString();
+  persistRequests();
   res.sendFile(path.join(__dirname, "public", "localizza.html"));
 });
 
@@ -91,6 +122,7 @@ function savePosition(code, body, res) {
   item.heading = Number.isFinite(Number(body.heading)) ? Number(body.heading) : null;
   item.updates += 1;
   item.updatedAt = new Date().toISOString();
+  persistRequests();
   res.json({ ok: true, updates: item.updates });
 }
 
