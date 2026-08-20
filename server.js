@@ -4,7 +4,7 @@ const crypto = require("crypto");
 
 const app = express();
 const requests = new Map();
-const accessKey = process.env.SMS_LOCATOR_KEY || process.env.CENTRALE_KEY || process.env.API_KEY || "";
+const accessKey = process.env.SMS_LOCATOR_KEY || process.env.CENTRALE_KEY || process.env.ADMIN_KEY || process.env.API_KEY || "";
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(__dirname, "public")));
